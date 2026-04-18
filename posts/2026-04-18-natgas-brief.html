@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Nat Gas Brief — 2026-04-18 | Brendan Fitzpatrick</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background-color: #ffffff;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        .site-header {
+            padding: 24px 24px 16px;
+            max-width: 900px;
+            margin: 0 auto;
+            border-bottom: 2px solid #003a70;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-header a {
+            color: #003a70;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid #003a70;
+        }
+
+        .site-header .brand {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003a70;
+            border: none;
+        }
+
+        .brief-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .brief-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .brief-label {
+            background: #003a70;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 3px;
+        }
+
+        .brief-date {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .brief-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #003a70;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .brief-subtitle {
+            font-size: 14px;
+            color: #4a7fb5;
+            margin-bottom: 32px;
+        }
+
+        h2 {
+            font-size: 17px;
+            color: #003a70;
+            font-weight: 700;
+            margin-top: 40px;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e0e4e8;
+        }
+
+        h3 {
+            font-size: 14px;
+            color: #003a70;
+            font-weight: 600;
+            margin-top: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 14px;
+        }
+
+        .callout {
+            background: #f7f9fb;
+            border-left: 3px solid #003a70;
+            padding: 14px 18px;
+            border-radius: 0 4px 4px 0;
+            margin-bottom: 16px;
+        }
+
+        .callout p {
+            margin-bottom: 0;
+            font-size: 13px;
+            color: #2c3e50;
+        }
+
+        .callout strong { color: #003a70; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        th {
+            background: #003a70;
+            color: white;
+            padding: 9px 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        tr:hover { background: #f7f9fb; }
+
+        td.val-bear { color: #c0392b; font-weight: 700; }
+        td.val-bull { color: #1a8a3f; font-weight: 700; }
+        td.val-neutral { color: #c78c00; font-weight: 700; }
+
+        .table-wrap {
+            background: white;
+            border: 1px solid #e0e4e8;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .table-label {
+            font-size: 11px;
+            color: #003a70;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 12px 14px 8px;
+            border-bottom: 1px solid #e0e4e8;
+            background: #f7f9fb;
+        }
+
+        .risk-flags {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        .risk-flags li {
+            display: flex;
+            gap: 12px;
+            padding: 14px 16px;
+            border: 1px solid #e0e4e8;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background: white;
+        }
+
+        .risk-flags li:hover {
+            background: #f7f9fb;
+        }
+
+        .flag-num {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            background: #c0392b;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+
+        .flag-body {
+            font-size: 13px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .flag-body strong { color: #003a70; }
+
+        .actions-list {
+            counter-reset: action-counter;
+            list-style: none;
+            padding: 0;
+            margin-bottom: 24px;
+        }
+
+        .actions-list li {
+            counter-increment: action-counter;
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            border-left: 3px solid #4a7fb5;
+            background: #f7f9fb;
+            margin-bottom: 8px;
+            border-radius: 0 4px 4px 0;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .actions-list li::before {
+            content: counter(action-counter);
+            flex-shrink: 0;
+            width: 20px;
+            height: 20px;
+            background: #4a7fb5;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+
+        .primers {
+            background: #f7f9fb;
+            border: 1px solid #e0e4e8;
+            border-radius: 4px;
+            padding: 14px 18px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 32px;
+        }
+
+        .primers strong { color: #003a70; }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #4a7fb5;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 28px;
+        }
+
+        .back-link:hover { color: #003a70; }
+    </style>
+</head>
+<body>
+
+<div class="site-header">
+    <span class="brand">Brendan Fitzpatrick</span>
+    <a href="/posts/">← All Briefs</a>
+</div>
+
+<div class="brief-wrap">
+
+    <a href="/posts/" class="back-link">← Market Briefs</a>
+
+    <div class="brief-meta">
+        <span class="brief-label">Daily Brief</span>
+        <span class="brief-date">Saturday, April 18, 2026</span>
+    </div>
+    <h1 class="brief-title">Natural Gas — Daily Start-of-Day Brief</h1>
+    <p class="brief-subtitle">EIA Storage · EIA-914 Production · NOAA Weather · VP Risk Flags</p>
+
+    <!-- ===== 1. EIA STORAGE ===== -->
+    <h2>1 · EIA Storage — Week Ending 2026-04-10 (Released 2026-04-16)</h2>
+
+    <div class="table-wrap">
+        <div class="table-label">Working Gas in Storage</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Working gas</td><td>1,970 Bcf</td></tr>
+                <tr><td>Weekly change</td><td class="val-bear">+59 Bcf (injection)</td></tr>
+                <tr><td>vs. 5-yr average</td><td class="val-bear">+108 Bcf (+5.8%)</td></tr>
+                <tr><td>vs. year-ago</td><td class="val-bear">+126 Bcf</td></tr>
+                <tr><td>5-yr avg</td><td>1,862 Bcf</td></tr>
+                <tr><td>NYMEX May close</td><td>~$2.61–2.64/MMBtu</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout">
+        <p>The +59 Bcf print came in <strong>21 Bcf bearish</strong> versus the 5-yr average implied build — surplus versus the 5-yr average is actively widening each report week.</p>
+    </div>
+
+    <p>You are on the steepest start-of-season trajectory toward <strong>4,000+ Bcf by November</strong>. EIA's April STEO projects end-October inventory at 4,015 Bcf, 6% above 5-yr average, on the back of production growth and constrained export capacity. That's a structural price ceiling on any summer rally unless demand surprises materially to the upside.</p>
+
+    <!-- ===== 2. EIA-914 PRODUCTION ===== -->
+    <h2>2 · EIA-914 Production</h2>
+
+    <div class="table-wrap">
+        <div class="table-label">Dry Gas Output</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Source</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Dry gas (real-time estimate)</td><td><strong>~109.3 Bcf/d</strong></td><td>Weekly storage supplement, week of Apr 10</td></tr>
+                <tr><td>Dry gas (Jan 2026 actuals, EIA-914)</td><td>108.6 Bcf/d</td><td>EIA Natural Gas Monthly</td></tr>
+                <tr><td>YTD growth vs. 2025</td><td class="val-bear">+3.6%</td><td>AGA/S&P Global</td></tr>
+                <tr><td>Northeast (Appalachian)</td><td>~35 Bcf/d</td><td>Slight shoulder-season pullback</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>January 2026 dry gas production was the highest for any January since 1973.</p>
+
+    <h3>Regional Color</h3>
+    <p>Northeast output has slipped roughly 1 Bcf/d from earlier-year highs to ~35 Bcf/d — typical shoulder-season softness ahead of the summer ramp.</p>
+    <p><strong>Waha remains structurally broken:</strong> Permian production and pipeline takeaway constraints have kept Waha prices negative for <strong>82% of 2026 trading days</strong>. Associated gas from continued Permian oil drilling is the key incremental supply vector — it's price-insensitive to Henry Hub, which is why the supply response to $2.60 prompt is muted.</p>
+
+    <!-- ===== 3. NOAA WEATHER ===== -->
+    <h2>3 · NOAA Weather — CPC HDD, Week Ending 2026-04-18</h2>
+
+    <div class="table-wrap">
+        <div class="table-label">Heating Degree Days by Region</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Region</th>
+                    <th>HDDs This Week</th>
+                    <th>Dev from Normal</th>
+                    <th>Dev from Last Yr</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>US National</strong></td><td>24</td><td class="val-bear">–57</td><td class="val-bear">–52</td></tr>
+                <tr><td>New England</td><td>30</td><td class="val-bear">–104</td><td class="val-bear">–106</td></tr>
+                <tr><td>Middle Atlantic</td><td>19</td><td class="val-bear">–98</td><td class="val-bear">–100</td></tr>
+                <tr><td>E N Central</td><td>13</td><td class="val-bear">–106</td><td class="val-bear">–97</td></tr>
+                <tr><td>W N Central</td><td>37</td><td class="val-bear">–73</td><td class="val-bear">–45</td></tr>
+                <tr><td>South Atlantic</td><td>3</td><td class="val-bear">–54</td><td class="val-bear">–61</td></tr>
+                <tr><td>Mountain</td><td>88</td><td class="val-bear">–24</td><td class="val-neutral">+2</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <p>The 2025–26 winter heating season ranked as the <strong>second-warmest in the Lower 48 since 2019–20</strong>, with utility-weighted HDDs 6.5% warmer than the 30-year normal.</p>
+
+    <div class="callout">
+        <p><strong>Forward look:</strong> DTN is calling for the mildest summer cooling season since 2017 as El Niño emerges by May. Combined with elevated pre-summer inventories, new Permian associated gas takeaway coming online in 3Q26, and decelerating LNG growth, the setup skews risks to the downside later this year.</p>
+    </div>
+
+    <!-- ===== RISK FLAGS ===== -->
+    <h2>VP Risk Flags</h2>
+
+    <ul class="risk-flags">
+        <li>
+            <span class="flag-num">1</span>
+            <div class="flag-body"><strong>Storage surplus is widening, not stabilizing.</strong> +108 Bcf vs. 5-yr avg with mildest summer forecast since 2017 = high probability the surplus widens through Q3. Any position that requires a price catalyst above $3.00 prompt faces headwinds.</div>
+        </li>
+        <li>
+            <span class="flag-num">2</span>
+            <div class="flag-body"><strong>Waha is uninvestable on directional length.</strong> 82% negative-print rate YTD — this is a takeaway story, not a demand story.</div>
+        </li>
+        <li>
+            <span class="flag-num">3</span>
+            <div class="flag-body"><strong>Northeast shoulder softness is a nomination risk.</strong> At ~35 Bcf/d with mild weather, you're in the zone where producers may curtail proactively or pipelines issue OFOs on pack constraints if a cold shot comes through unexpectedly — watch Algonquin and Tennessee 200L nomination cycles.</div>
+        </li>
+        <li>
+            <span class="flag-num">4</span>
+            <div class="flag-body"><strong>LNG is the swing variable that offsets bearish storage math.</strong> U.S. LNG exports were estimated at 17.9 Bcf/d in March, the second-highest monthly volume on record. Any Hormuz de-escalation that narrows the HH-TTF spread could pull feedgas volumes and flip the storage trajectory.</div>
+        </li>
+    </ul>
+
+    <!-- ===== NEXT ACTIONS ===== -->
+    <h2>Next Actions — 24–72 hrs</h2>
+
+    <ol class="actions-list">
+        <li>Check Apr 23 storage print consensus now — if the market is pricing +65–70 Bcf vs. a print likely in the +60–70 range, there's no edge in the number itself; trade the miss vs. weather revisions.</li>
+        <li>Pull Waha basis curve on NYMEX — if basis is less negative than spot realized YTD, there may be a short-basis trade into 3Q26 takeaway additions.</li>
+        <li>Map LNG feedgas daily flows (Sabine, Plaquemines, Corpus Christi) — 20 Bcf/d is the demand anchor. Any slippage below 18 Bcf/d is a storage bull-case killer.</li>
+        <li>Watch NOAA 8-14 day for any early CDDs in Texas/Southeast that would tighten the injection trajectory.</li>
+    </ol>
+
+    <!-- ===== PRIMERS ===== -->
+    <div class="primers">
+        <strong>Primers exercised:</strong> Primer on Storage Mechanics (injection season math, surplus/deficit framework); Primer on Pipeline Mechanics (Waha takeaway, Algonquin constraints) &nbsp;|&nbsp;
+        <strong>Sim to deepen:</strong> T2, Waha/Permian, shoulder-season takeaway constraint with positive storage delta — run natgas-trader-ops-sim with those inputs to model the basis trade setup.
+    </div>
+
+</div>
+
+</body>
+</html>
