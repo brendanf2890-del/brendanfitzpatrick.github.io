@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Market Briefs | Brendan Fitzpatrick</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #2c3e50;
+            background-color: #ffffff;
+        }
+
+        .site-header {
+            padding: 24px 24px 16px;
+            max-width: 900px;
+            margin: 0 auto;
+            border-bottom: 2px solid #003a70;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-header a {
+            color: #003a70;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            border-bottom: 1px solid #003a70;
+        }
+
+        .site-header .brand {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003a70;
+            border: none;
+        }
+
+        .page-wrap {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #003a70;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+
+        .page-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 32px;
+        }
+
+        .brief-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .brief-item {
+            border: 1px solid #e0e4e8;
+            border-radius: 4px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            background: white;
+            transition: all 0.15s ease;
+        }
+
+        .brief-item:hover {
+            box-shadow: 0 4px 12px rgba(0,58,112,0.08);
+            transform: translateY(-1px);
+        }
+
+        .brief-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .brief-item-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .brief-tag {
+            background: #003a70;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 3px;
+        }
+
+        .brief-item-date {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .brief-item-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #003a70;
+            margin-bottom: 4px;
+        }
+
+        .brief-item-summary {
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="site-header">
+    <span class="brand">Brendan Fitzpatrick</span>
+    <a href="/">← Portfolio</a>
+</div>
+
+<div class="page-wrap">
+    <h1 class="page-title">Market Briefs</h1>
+    <p class="page-desc">Daily start-of-day natural gas market synthesis — EIA storage, production, weather, and VP-level risk flags.</p>
+
+    <ul class="brief-list">
+        <li class="brief-item">
+            <a href="/posts/2026-04-18-natgas-brief.html">
+                <div class="brief-item-meta">
+                    <span class="brief-tag">Natural Gas</span>
+                    <span class="brief-item-date">April 18, 2026</span>
+                </div>
+                <div class="brief-item-title">Daily Nat Gas Brief — 2026-04-18</div>
+                <div class="brief-item-summary">Storage at 1,970 Bcf (+108 Bcf vs. 5-yr avg, surplus widening). Production ~109.3 Bcf/d. Mildest summer forecast since 2017. Four VP risk flags: storage surplus trajectory, Waha uninvestable on length, NE nomination risk, LNG as swing variable.</div>
+            </a>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>
