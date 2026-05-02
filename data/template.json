@@ -1,0 +1,77 @@
+{
+  "_comment": "Copy this file to data/YYYY-MM-DD.json, fill in today's values, then run: python3 scripts/publish_brief.py data/YYYY-MM-DD.json",
+
+  "date": "2026-04-18",
+
+  "storage": {
+    "week_ending":  "2026-04-10",
+    "release_date": "2026-04-16",
+    "working_gas_bcf": "1,970",
+    "weekly_change": "+59 Bcf (injection)",
+    "weekly_change_sentiment": "bear",
+    "vs_5yr_avg": "+108 Bcf (+5.8%)",
+    "vs_5yr_avg_sentiment": "bear",
+    "vs_year_ago": "+126 Bcf",
+    "five_yr_avg_bcf": "1,862",
+    "nymex_close": "~$2.61–2.64/MMBtu",
+    "callout_html": "The +59 Bcf print came in <strong>21 Bcf bearish</strong> versus the 5-yr average implied build — surplus versus the 5-yr average is actively widening each report week.",
+    "narrative_html": "You are on the steepest start-of-season trajectory toward <strong>4,000+ Bcf by November</strong>. EIA's April STEO projects end-October inventory at 4,015 Bcf, 6% above 5-yr average, on the back of production growth and constrained export capacity. That's a structural price ceiling on any summer rally unless demand surprises materially to the upside."
+  },
+
+  "production": {
+    "realtime_estimate": "~109.3 Bcf/d",
+    "monthly_actuals": "108.6 Bcf/d",
+    "monthly_actuals_period": "Jan 2026",
+    "ytd_growth": "+3.6%",
+    "ytd_growth_sentiment": "bear",
+    "northeast_output": "~35 Bcf/d",
+    "record_note_html": "January 2026 dry gas production was the highest for any January since 1973.",
+    "regional_html": "Northeast output has slipped roughly 1 Bcf/d from earlier-year highs to ~35 Bcf/d — typical shoulder-season softness ahead of the summer ramp.",
+    "waha_html": "<strong>Waha remains structurally broken:</strong> Permian production and pipeline takeaway constraints have kept Waha prices negative for <strong>82% of 2026 trading days</strong>. Associated gas from continued Permian oil drilling is the key incremental supply vector — it's price-insensitive to Henry Hub, which is why the supply response to $2.60 prompt is muted."
+  },
+
+  "weather": {
+    "week_ending": "2026-04-18",
+    "regions": [
+      {"name": "US National",     "hdds": 24, "dev_normal": -57,  "dev_lastyear": -52,  "bold": true},
+      {"name": "New England",     "hdds": 30, "dev_normal": -104, "dev_lastyear": -106, "bold": false},
+      {"name": "Middle Atlantic", "hdds": 19, "dev_normal": -98,  "dev_lastyear": -100, "bold": false},
+      {"name": "E N Central",     "hdds": 13, "dev_normal": -106, "dev_lastyear": -97,  "bold": false},
+      {"name": "W N Central",     "hdds": 37, "dev_normal": -73,  "dev_lastyear": -45,  "bold": false},
+      {"name": "South Atlantic",  "hdds": 3,  "dev_normal": -54,  "dev_lastyear": -61,  "bold": false},
+      {"name": "Mountain",        "hdds": 88, "dev_normal": -24,  "dev_lastyear": 2,    "bold": false}
+    ],
+    "season_html": "The 2025–26 winter heating season ranked as the <strong>second-warmest in the Lower 48 since 2019–20</strong>, with utility-weighted HDDs 6.5% warmer than the 30-year normal.",
+    "forward_html": "<strong>Forward look:</strong> DTN is calling for the mildest summer cooling season since 2017 as El Niño emerges by May. Combined with elevated pre-summer inventories, new Permian associated gas takeaway coming online in 3Q26, and decelerating LNG growth, the setup skews risks to the downside later this year."
+  },
+
+  "risk_flags": [
+    {
+      "title": "Storage surplus is widening, not stabilizing.",
+      "body_html": "+108 Bcf vs. 5-yr avg with mildest summer forecast since 2017 = high probability the surplus widens through Q3. Any position that requires a price catalyst above $3.00 prompt faces headwinds."
+    },
+    {
+      "title": "Waha is uninvestable on directional length.",
+      "body_html": "82% negative-print rate YTD — this is a takeaway story, not a demand story."
+    },
+    {
+      "title": "Northeast shoulder softness is a nomination risk.",
+      "body_html": "At ~35 Bcf/d with mild weather, you're in the zone where producers may curtail proactively or pipelines issue OFOs on pack constraints if a cold shot comes through unexpectedly — watch Algonquin and Tennessee 200L nomination cycles."
+    },
+    {
+      "title": "LNG is the swing variable that offsets bearish storage math.",
+      "body_html": "U.S. LNG exports were estimated at 17.9 Bcf/d in March, the second-highest monthly volume on record. Any Hormuz de-escalation that narrows the HH-TTF spread could pull feedgas volumes and flip the storage trajectory."
+    }
+  ],
+
+  "actions": [
+    "Check Apr 23 storage print consensus now — if the market is pricing +65–70 Bcf vs. a print likely in the +60–70 range, there's no edge in the number itself; trade the miss vs. weather revisions.",
+    "Pull Waha basis curve on NYMEX — if basis is less negative than spot realized YTD, there may be a short-basis trade into 3Q26 takeaway additions.",
+    "Map LNG feedgas daily flows (Sabine, Plaquemines, Corpus Christi) — 20 Bcf/d is the demand anchor. Any slippage below 18 Bcf/d is a storage bull-case killer.",
+    "Watch NOAA 8-14 day for any early CDDs in Texas/Southeast that would tighten the injection trajectory."
+  ],
+
+  "primers": "Primer on Storage Mechanics (injection season math, surplus/deficit framework); Primer on Pipeline Mechanics (Waha takeaway, Algonquin constraints)",
+  "sim": "T2, Waha/Permian, shoulder-season takeaway constraint with positive storage delta — run natgas-trader-ops-sim with those inputs to model the basis trade setup.",
+  "index_summary": "Storage at 1,970 Bcf (+108 Bcf vs. 5-yr avg, surplus widening). Production ~109.3 Bcf/d. Mildest summer forecast since 2017. Four VP risk flags: storage surplus trajectory, Waha uninvestable on length, NE nomination risk, LNG as swing variable."
+}
