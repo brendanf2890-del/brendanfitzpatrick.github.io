@@ -1,107 +1,60 @@
 # CLAUDE.md
 
-Guidance for AI assistants (and humans) working in this repository.
+## What this project is
 
-## What this is
+This is the personal portfolio and blog website for Brendan Fitzpatrick, a
+physical commodities operations professional. It's a static website hosted on
+GitHub Pages at `brendanfitzpatrick.github.io` — the homepage is a one-page
+résumé/portfolio, and the `posts/` section holds dated "Market Briefs"
+(currently daily natural-gas write-ups).
 
-A personal portfolio and blog website for **Brendan Fitzpatrick**, a physical
-commodities operations professional. It is a **static site hosted on GitHub
-Pages** at `brendanfitzpatrick.github.io`.
+## How to run and test it
 
-There is **no build step, no framework, no dependencies, and no test suite**.
-Every page is a self-contained, hand-written HTML file with inline `<style>`
-and inline `<script>` blocks. Edit the HTML, commit, push — GitHub Pages
-serves it directly.
+- Run it: there's no build step. To preview locally, run `python3 -m http.server`
+  in the project folder, then open `http://localhost:8000/` in a browser. You
+  can also just double-click an `.html` file to open it.
+- Run tests: none — this is a hand-written static site with no test suite.
+- Build it: n/a. Editing the HTML and pushing is all it takes; GitHub Pages
+  serves the files directly.
 
-## Repository layout
+## Tech stack
 
-```
-.
-├── index.html                          # Single-page portfolio (the homepage)
-├── README.md                           # One-line project description
-└── posts/                              # "Market Briefs" blog section
-    ├── index.html                      # Brief listing / index page
-    └── 2026-04-18-natgas-brief.html    # An individual dated brief
-```
+- Plain HTML with inline CSS (a `<style>` block inside each page) and a little
+  inline JavaScript. No framework, no dependencies installed in the repo.
+- Chart.js is loaded from a CDN (only on the homepage) to draw the dashboard
+  charts. That's the only external library.
 
-- **`index.html`** — The homepage. A long single-page layout with a sticky nav
-  and these sections (anchored by `id`): `#focus` (Areas of Focus), `#tools`
-  (Risk Automation & Analytics), `#dashboard` (Ops Risk Dashboard with
-  Chart.js charts + tables), `#pipeline` (Settlement Pipeline), `#skills`
-  (Technical Skills), `#scope` (Operational Scope). Charts are rendered by an
-  inline `<script>` at the bottom using **Chart.js loaded from a CDN**
-  (`cdnjs.cloudflare.com`). All chart data is hardcoded/simulated.
-- **`posts/index.html`** — Lists the daily market briefs. Each brief is a
-  `<li class="brief-item">` linking to its page. **Add new briefs here** so
-  they appear in the index.
-- **`posts/YYYY-MM-DD-<topic>-brief.html`** — An individual brief. The existing
-  one is a daily natural-gas brief with sections: EIA Storage, EIA-914
-  Production, NOAA Weather, VP Risk Flags, and Next Actions.
+## How I want you to work with me
 
-## Conventions
+- I'm light on coding. Explain what you're doing in plain English and skip unexplained jargon.
+- Show me your plan before you make changes. Wait for my OK on anything bigger than a tiny edit.
+- Keep changes small and focused. One thing at a time.
+- After editing, open the page (or describe how to check it) and tell me whether it worked.
+- If something is unclear, ask me one question instead of guessing.
+- When you finish, give me a two-line summary: what changed, and how I can check it.
 
-Follow the patterns already in the files — consistency matters more than any
-external "best practice" here.
+## Project conventions
 
-- **Self-contained pages.** Each HTML file carries its own `<style>` block.
-  There is no shared CSS file; styles are duplicated/adapted per page. When
-  creating a page, copy the closest existing file and adjust.
-- **Links are root-relative.** Use `/`, `/posts/`, `/posts/<file>.html`
-  (matching the GitHub Pages root). Don't use relative `../` paths.
-- **Brand color palette** (used consistently across all pages):
-  - Navy (primary): `#003a70`
-  - Steel blue: `#4a7fb5`, light steel: `#7ba3cc`
-  - Status: green `#1a8a3f` (`.status-green`), yellow `#c78c00`
-    (`.status-yellow`), red `#c0392b` (`.status-red`)
-  - Body text: `#2c3e50`; muted: `#666`/`#999`; borders: `#e0e4e8`
-- **Typography:** system font stack
-  (`-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif`), `line-height: 1.6`.
-- **Layout:** centered containers with `max-width` (1100px on the homepage,
-  900px in posts) and `margin: 0 auto`. Cards use 4px border-radius, subtle
-  hover lift (`transform: translateY(-1px)` + box-shadow).
-- **Responsive:** grids use `repeat(auto-fit, minmax(...))`; there is a
-  `@media (max-width: 768px)` block on the homepage.
-- **Comments:** sections are delimited with banner comments like
-  `<!-- ===== 1. EIA STORAGE ===== -->`.
-- **Content is real/personal** (contact email, LinkedIn, résumé-style claims).
-  The Ops Risk Dashboard numbers and counterparties are explicitly **simulated
-  sample data** — keep that framing; don't present them as real.
+- Match the style of the files that are already here. Each page is
+  self-contained, with its own styles — when making a new page, copy the
+  closest existing one and adjust it.
+- Put new market briefs in the `posts/` folder, named like
+  `YYYY-MM-DD-topic-brief.html`, and add a link to them at the top of
+  `posts/index.html` (newest first).
+- Use the site's navy-blue color scheme (`#003a70` is the main color) and
+  root-relative links like `/` and `/posts/` — not `../` style links.
+- The dashboard numbers on the homepage are sample/simulated data. Keep them
+  labeled that way; don't present them as real figures.
 
-## Common tasks
+## Guardrails (ask me first before doing any of these)
 
-### Add a new market brief
-1. Copy `posts/2026-04-18-natgas-brief.html` to
-   `posts/<YYYY-MM-DD>-<topic>-brief.html`.
-2. Update the `<title>`, `.brief-date`, `.brief-title`, `.brief-subtitle`, and
-   the section content.
-3. Add a new `<li class="brief-item">` entry at the **top** of the list in
-   `posts/index.html` (newest first), pointing to the new file with a tag,
-   date, title, and summary.
+- Don't delete files or folders without showing me first.
+- Don't touch settings, dependencies, or anything outside the task I gave you.
+- Never put passwords, API keys, or other secrets in this file or in committed code.
 
-### Edit the homepage
-- Edit `index.html` directly. If you add a new section, give it an `id` and add
-  a matching `<a href="#id">` to the `.nav-bar nav`. The active-nav-on-scroll
-  logic in the bottom `<script>` picks up any `<section>` automatically.
+## For long sessions and mobile review
 
-### Add/modify a chart
-- Charts live in the inline `<script>` at the bottom of `index.html` using
-  `new Chart(document.getElementById('...'), {...})`. Add a matching
-  `<canvas id="...">` inside a `.chart-wrapper` in the `#dashboard` section.
-  Reuse the predefined color constants (`navy`, `steel`, `green`, etc.).
-
-## Verifying changes
-
-There is no build or CI for the site. To check work:
-- Open the HTML file in a browser, or serve locally, e.g.
-  `python3 -m http.server` then visit `http://localhost:8000/`.
-- Verify internal links resolve, the page renders, and (for the homepage)
-  charts draw without console errors (requires internet for the Chart.js CDN).
-
-## Git workflow
-
-- Default branch: `main`. GitHub Pages serves from it.
-- Make changes on a feature branch and push; open a PR only when explicitly
-  requested.
-- Keep commits focused with clear, descriptive messages.
+- Commit your work in small steps with clear messages, so I can review it on a small screen.
+- Keep each change easy to review on its own. Smaller diffs are easier to approve from a phone.
+- If you pause a long task, end with a note: what's done and what's next.
 </content>
-</invoke>
