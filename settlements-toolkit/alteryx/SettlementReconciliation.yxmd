@@ -1,0 +1,374 @@
+<?xml version="1.0"?>
+<AlteryxDocument yxmdVer="2021.4">
+  <Nodes>
+    <!-- ============ Tier-1 INPUT: book / data-lake delivered + invoiced ===== -->
+    <Node ToolID="1">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="54" y="54" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File RecordLimit="" FileFormat="0" OutputFileName="">%engine.workflowdirectory%..\sample-data\book.csv</File>
+          <FormatSpecificOptions>
+            <HeaderRow>True</HeaderRow>
+            <IgnoreErrors>False</IgnoreErrors>
+            <AllowShareWrite>False</AllowShareWrite>
+            <ImportLine>1</ImportLine>
+            <FieldLen>254</FieldLen>
+            <SingleThreadRead>False</SingleThreadRead>
+            <IgnoreQuotes>DoubleQuotes</IgnoreQuotes>
+            <Delimeter>,</Delimeter>
+            <QuoteRecordBreak>False</QuoteRecordBreak>
+            <CodePage>28591</CodePage>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>book.csv (Tier 1 - what happened)</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+
+    <!-- ============ Tier-1 INPUT: pipeline scheduling + allocation ========== -->
+    <Node ToolID="2">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="54" y="162" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File RecordLimit="" FileFormat="0" OutputFileName="">%engine.workflowdirectory%..\sample-data\pipeline.csv</File>
+          <FormatSpecificOptions>
+            <HeaderRow>True</HeaderRow>
+            <IgnoreErrors>False</IgnoreErrors>
+            <AllowShareWrite>False</AllowShareWrite>
+            <ImportLine>1</ImportLine>
+            <FieldLen>254</FieldLen>
+            <SingleThreadRead>False</SingleThreadRead>
+            <IgnoreQuotes>DoubleQuotes</IgnoreQuotes>
+            <Delimeter>,</Delimeter>
+            <QuoteRecordBreak>False</QuoteRecordBreak>
+            <CodePage>28591</CodePage>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>pipeline.csv (Tier 1 - allocation = truth for delivered vol)</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+
+    <!-- ============ Tier-1 INPUT: counterparty statement =================== -->
+    <Node ToolID="3">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="54" y="270" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File RecordLimit="" FileFormat="0" OutputFileName="">%engine.workflowdirectory%..\sample-data\counterparty.csv</File>
+          <FormatSpecificOptions>
+            <HeaderRow>True</HeaderRow>
+            <IgnoreErrors>False</IgnoreErrors>
+            <AllowShareWrite>False</AllowShareWrite>
+            <ImportLine>1</ImportLine>
+            <FieldLen>254</FieldLen>
+            <SingleThreadRead>False</SingleThreadRead>
+            <IgnoreQuotes>DoubleQuotes</IgnoreQuotes>
+            <Delimeter>,</Delimeter>
+            <QuoteRecordBreak>False</QuoteRecordBreak>
+            <CodePage>28591</CodePage>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>counterparty.csv (cross-check only)</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+
+    <!-- ============ Tier-1 INPUT: Gas Daily index + basis ================== -->
+    <Node ToolID="4">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileInput.DbFileInput">
+        <Position x="54" y="378" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File RecordLimit="" FileFormat="0" OutputFileName="">%engine.workflowdirectory%..\sample-data\index_prices.csv</File>
+          <FormatSpecificOptions>
+            <HeaderRow>True</HeaderRow>
+            <IgnoreErrors>False</IgnoreErrors>
+            <AllowShareWrite>False</AllowShareWrite>
+            <ImportLine>1</ImportLine>
+            <FieldLen>254</FieldLen>
+            <SingleThreadRead>False</SingleThreadRead>
+            <IgnoreQuotes>DoubleQuotes</IgnoreQuotes>
+            <Delimeter>,</Delimeter>
+            <QuoteRecordBreak>False</QuoteRecordBreak>
+            <CodePage>28591</CodePage>
+          </FormatSpecificOptions>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>index_prices.csv (Gas Daily + basis)</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileInput" />
+    </Node>
+
+    <!-- ============ JOIN 1: book + pipeline on (gas_day,contract,point) ===== -->
+    <Node ToolID="5">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+        <Position x="210" y="108" />
+      </GuiSettings>
+      <Properties>
+        <Configuration joinByRecordPos="False">
+          <JoinInfo connection="Left">
+            <Field field="gas_day" />
+            <Field field="contract" />
+            <Field field="point" />
+          </JoinInfo>
+          <JoinInfo connection="Right">
+            <Field field="gas_day" />
+            <Field field="contract" />
+            <Field field="point" />
+          </JoinInfo>
+          <SelectConfiguration>
+            <Configuration outputConnection="Join">
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Right_gas_day" selected="False" />
+                <SelectField field="Right_contract" selected="False" />
+                <SelectField field="Right_point" selected="False" />
+                <SelectField field="Right_units" selected="False" />
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+          </SelectConfiguration>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>book x pipeline</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+    </Node>
+
+    <!-- ============ JOIN 2: (book+pipeline) + counterparty ================= -->
+    <Node ToolID="6">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+        <Position x="342" y="138" />
+      </GuiSettings>
+      <Properties>
+        <Configuration joinByRecordPos="False">
+          <JoinInfo connection="Left">
+            <Field field="gas_day" />
+            <Field field="contract" />
+            <Field field="point" />
+          </JoinInfo>
+          <JoinInfo connection="Right">
+            <Field field="gas_day" />
+            <Field field="contract" />
+            <Field field="point" />
+          </JoinInfo>
+          <SelectConfiguration>
+            <Configuration outputConnection="Join">
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Right_gas_day" selected="False" />
+                <SelectField field="Right_contract" selected="False" />
+                <SelectField field="Right_point" selected="False" />
+                <SelectField field="Right_units" selected="False" />
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+          </SelectConfiguration>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>+ counterparty</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+    </Node>
+
+    <!-- ============ JOIN 3: + index on (gas_day, point) ==================== -->
+    <Node ToolID="7">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Join.Join">
+        <Position x="474" y="180" />
+      </GuiSettings>
+      <Properties>
+        <Configuration joinByRecordPos="False">
+          <JoinInfo connection="Left">
+            <Field field="gas_day" />
+            <Field field="point" />
+          </JoinInfo>
+          <JoinInfo connection="Right">
+            <Field field="gas_day" />
+            <Field field="point" />
+          </JoinInfo>
+          <SelectConfiguration>
+            <Configuration outputConnection="Join">
+              <OrderChanged value="False" />
+              <CommaDecimal value="False" />
+              <SelectFields>
+                <SelectField field="Right_gas_day" selected="False" />
+                <SelectField field="Right_point" selected="False" />
+                <SelectField field="Right_units" selected="False" />
+                <SelectField field="*Unknown" selected="True" />
+              </SelectFields>
+            </Configuration>
+          </SelectConfiguration>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>+ Gas Daily index</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxJoin" />
+    </Node>
+
+    <!-- ============ FORMULA: variance decomposition + classification ======= -->
+    <Node ToolID="8">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.Formula.Formula">
+        <Position x="606" y="180" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <FormulaFields>
+            <FormulaField expression="ToNumber([sched_timely_dth]) - ToNumber([sched_final_dth])" field="cut_dth" size="8" type="Double" />
+            <FormulaField expression="ToNumber([sched_final_dth]) - ToNumber([allocated_dth])" field="alloc_var_dth" size="8" type="Double" />
+            <FormulaField expression="ToNumber([delivered_dth]) - ToNumber([allocated_dth])" field="total_break_dth" size="8" type="Double" />
+            <FormulaField expression="ToNumber([allocated_dth]) - ToNumber([confirmed_dth])" field="cp_var_dth" size="8" type="Double" />
+            <FormulaField expression="ToNumber([receipt_allocated_dth]) - ToNumber([allocated_dth])" field="net_imbalance_dth" size="8" type="Double" />
+            <FormulaField expression="IF Abs([total_break_dth])&lt;=0 AND Abs([cp_var_dth])&lt;=0 THEN &quot;TIE&quot; ELSE &quot;BREAK&quot; ENDIF" field="status" size="10" type="V_WString" />
+            <FormulaField expression="IF [status]=&quot;TIE&quot; THEN &quot;Book = allocation = counterparty&quot;&#10;ELSEIF Abs([cut_dth])&gt;=Abs([alloc_var_dth]) AND [cut_dth]!=0 THEN &quot;Uncaptured scheduling cut &quot;+ToString([cut_dth],0)+&quot; Dth (book stored Timely nomination, not final scheduled). &quot;+[cut_reason]&#10;ELSEIF [alloc_var_dth]!=0 THEN &quot;Allocation variance &quot;+ToString([alloc_var_dth],0)+&quot; Dth (final scheduled vs pool allocation; method=&quot;+[alloc_method]+&quot;)&quot;&#10;ELSEIF [cp_var_dth]!=0 THEN &quot;Counterparty statement disagrees with pipeline allocation &quot;+ToString([cp_var_dth],0)+&quot; Dth (pipeline allocation is Tier-1 truth)&quot;&#10;ELSE &quot;Book vs allocation gap with no scheduled-cycle attribution&quot; ENDIF" field="root_cause" size="500" type="V_WString" />
+            <FormulaField expression="IF Abs([net_imbalance_dth])&gt;0 THEN &quot;NET IMBALANCE &quot;+ToString([net_imbalance_dth],0)+&quot; Dth - cut did not hit both legs evenly&quot; ELSE &quot;Receipts = deliveries (nil imbalance)&quot; ENDIF" field="imbalance_flag" size="200" type="V_WString" />
+            <FormulaField expression="ToNumber([index_price]) + ToNumber([basis])" field="all_in_price" size="8" type="Double" />
+            <FormulaField expression="IF Uppercase([is_final])=&quot;Y&quot; THEN &quot;Final&quot; ELSE &quot;PRELIMINARY&quot; ENDIF" field="price_status" size="12" type="V_WString" />
+            <FormulaField expression="[total_break_dth] * ([all_in_price])" field="cash_delta_usd" size="8" type="Double" />
+          </FormulaFields>
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>Stage 4: decompose break = cut + alloc_var; rank cause; cash impact</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxFormula" />
+    </Node>
+
+    <!-- ============ OUTPUT: reconciliation result =========================== -->
+    <Node ToolID="9">
+      <GuiSettings Plugin="AlteryxBasePluginsGui.DbFileOutput.DbFileOutput">
+        <Position x="762" y="180" />
+      </GuiSettings>
+      <Properties>
+        <Configuration>
+          <Passwords />
+          <File MaxRecords="" FileFormat="0">%engine.workflowdirectory%..\sample-data\reconciliation_output.csv</File>
+          <Passwords />
+          <FormatSpecificOptions>
+            <LineEndStyle>CRLF</LineEndStyle>
+            <Delimeter>,</Delimeter>
+            <ForceQuotes>False</ForceQuotes>
+            <HeaderRow>True</HeaderRow>
+            <CodePage>28591</CodePage>
+            <WriteBOM>True</WriteBOM>
+          </FormatSpecificOptions>
+          <MultiFile value="False" />
+        </Configuration>
+        <Annotation DisplayMode="0">
+          <Name />
+          <DefaultAnnotationText>reconciliation_output.csv (Excel-transferable)</DefaultAnnotationText>
+          <Left value="False" />
+        </Annotation>
+      </Properties>
+      <EngineSettings EngineDll="AlteryxBasePluginsEngine.dll" EngineDllEntryPoint="AlteryxDbFileOutput" />
+    </Node>
+  </Nodes>
+
+  <Connections>
+    <Connection>
+      <Origin ToolID="1" Connection="Output" />
+      <Destination ToolID="5" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="2" Connection="Output" />
+      <Destination ToolID="5" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="5" Connection="Join" />
+      <Destination ToolID="6" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="3" Connection="Output" />
+      <Destination ToolID="6" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="6" Connection="Join" />
+      <Destination ToolID="7" Connection="Left" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="4" Connection="Output" />
+      <Destination ToolID="7" Connection="Right" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="7" Connection="Join" />
+      <Destination ToolID="8" Connection="Input" />
+    </Connection>
+    <Connection>
+      <Origin ToolID="8" Connection="Output" />
+      <Destination ToolID="9" Connection="Input" />
+    </Connection>
+  </Connections>
+
+  <Properties>
+    <Memory default="True" />
+    <GlobalRecordLimit value="0" />
+    <TempFiles default="True" />
+    <Annotation on="True" includeToolName="False" />
+    <ConvErrorLimit value="10" />
+    <ConvErrorLimit_Stop value="False" />
+    <CancelOnError value="False" />
+    <DisableBrowse value="False" />
+    <EnablePerformanceProfiling value="False" />
+    <DisableAllOutput value="False" />
+    <ShowAllMacroMessages value="False" />
+    <ShowConnectionStatusIsOn value="True" />
+    <ShowConnectionStatusOnlyWhenRunning value="True" />
+    <ZoomLevel value="0" />
+    <LayoutType>Horizontal</LayoutType>
+    <MetaInfo>
+      <NameIsFileName value="True" />
+      <Name>SettlementReconciliation</Name>
+      <Description>Physical-gas pipeline delivery reconciliation. Joins Tier-1 book, pipeline-allocation, counterparty, and Gas Daily index on (gas_day, contract, point); decomposes any volume break into an uncaptured scheduling cut vs an allocation variance; tests for a path imbalance; and restates the cash impact at Gas Daily + basis. Implements Appendix A of the Energy Settlements Delivery Workflow.</Description>
+      <RootToolName />
+      <ToolVersion />
+      <ToolInDb value="False" />
+      <CategoryName />
+      <SearchTags />
+      <Author>Energy Settlements Toolkit</Author>
+      <Company />
+      <Copyright />
+      <DescriptionLink actual="" displayed="" />
+      <Telemetry>
+        <PreviousReportingIds />
+      </Telemetry>
+    </MetaInfo>
+  </Properties>
+</AlteryxDocument>

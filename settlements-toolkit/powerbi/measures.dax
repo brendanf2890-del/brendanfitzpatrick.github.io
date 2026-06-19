@@ -1,0 +1,90 @@
+// =============================================================================
+// Energy Settlements - Power BI measures
+// Model: load the four /sample-data CSVs (or live lake tables) as:
+//   Book[gas_day, contract, point, delivered_dth, invoiced_dth]
+//   Pipeline[gas_day, contract, point, sched_timely_dth, sched_final_dth,
+//            allocated_dth, receipt_allocated_dth, cut_reason, alloc_method]
+//   Counterparty[gas_day, contract, point, confirmed_dth]
+//   Index[gas_day, point, index_price, basis, is_final]
+//
+// Build a composite key on each table for relationships:
+//   Key = [gas_day] & "|" & [contract] & "|" & [point]
+// Relate Book/Pipeline/Counterparty 1:1 on Key. Relate Index on gas_day&"|"&point.
+// Put all measures below in a measures table (e.g. _Recon).
+//
+// These mirror the VBA engine and the Alteryx Formula tool exactly so the three
+// platforms reconcile to the same numbers (Stage-5 cross-platform control).
+// =============================================================================
+
+// ---- Core volumes (truth = pipeline allocation) -----------------------------
+Book Delivered Dth   = SUM ( Book[delivered_dth] )
+Sched Timely Dth     = SUM ( Pipeline[sched_timely_dth] )
+Sched Final Dth      = SUM ( Pipeline[sched_final_dth] )
+Allocated Dth        = SUM ( Pipeline[allocated_dth] )
+CP Confirmed Dth     = SUM ( Counterparty[confirmed_dth] )
+Receipt Allocated Dth = SUM ( Pipeline[receipt_allocated_dth] )
+
+// ---- Break decomposition (Principle 5: show the math) -----------------------
+Cut Dth          = [Sched Timely Dth] - [Sched Final Dth]
+Alloc Var Dth    = [Sched Final Dth]  - [Allocated Dth]
+Total Break Dth  = [Book Delivered Dth] - [Allocated Dth]
+CP Var Dth       = [Allocated Dth] - [CP Confirmed Dth]
+Net Imbalance Dth = [Receipt Allocated Dth] - [Allocated Dth]
+
+// ---- Cash impact at Gas Daily + basis ---------------------------------------
+All-in Price =
+VAR p = SUM ( 'Index'[index_price] )
+VAR b = SUM ( 'Index'[basis] )
+RETURN p + b
+
+Cash Delta USD = [Total Break Dth] * [All-in Price]
+
+// ---- Status + classification (Principle 6: ranked cause) --------------------
+Break Status =
+IF (
+    ABS ( [Total Break Dth] ) <= 0 && ABS ( [CP Var Dth] ) <= 0,
+    "TIE",
+    "BREAK"
+)
+
+Break Count = SUMX (
+    SUMMARIZE ( Pipeline, Pipeline[gas_day], Pipeline[contract], Pipeline[point] ),
+    IF ( [Break Status] = "BREAK", 1, 0 )
+)
+
+Break $ Exposure = SUMX (
+    SUMMARIZE ( Pipeline, Pipeline[gas_day], Pipeline[contract], Pipeline[point] ),
+    IF ( [Break Status] = "BREAK", ABS ( [Cash Delta USD] ), 0 )
+)
+
+Root Cause =
+SWITCH (
+    TRUE (),
+    [Break Status] = "TIE", "Book = allocation = counterparty",
+    ABS ( [Cut Dth] ) >= ABS ( [Alloc Var Dth] ) && [Cut Dth] <> 0,
+        "Uncaptured scheduling cut " & FORMAT ( [Cut Dth], "#,##0" )
+        & " Dth (book stored Timely nomination, not final scheduled)",
+    [Alloc Var Dth] <> 0,
+        "Allocation variance " & FORMAT ( [Alloc Var Dth], "#,##0" )
+        & " Dth (final scheduled vs pool allocation)",
+    [CP Var Dth] <> 0,
+        "Counterparty statement disagrees with allocation "
+        & FORMAT ( [CP Var Dth], "#,##0" ) & " Dth (allocation is Tier-1 truth)",
+    "Book vs allocation gap with no scheduled-cycle attribution"
+)
+
+Imbalance Flag =
+IF (
+    ABS ( [Net Imbalance Dth] ) > 0,
+    "NET IMBALANCE " & FORMAT ( [Net Imbalance Dth], "#,##0" ) & " Dth",
+    "Receipts = deliveries (nil imbalance)"
+)
+
+// ---- Control gate: block invoicing when book <> allocation ------------------
+// Drive a card/KPI; red when any contract is out of tie.
+Invoice Hold =
+IF ( [Break Count] > 0, "HOLD - breaks open", "CLEAR" )
+
+// ---- Preliminary-index guard (Stage-5 edge case) ----------------------------
+Preliminary Price Count =
+COUNTROWS ( FILTER ( 'Index', UPPER ( 'Index'[is_final] ) <> "Y" ) )

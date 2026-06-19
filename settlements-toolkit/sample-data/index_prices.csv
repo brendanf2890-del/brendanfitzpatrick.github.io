@@ -1,0 +1,5 @@
+gas_day,point,index_name,index_price,basis,is_final,units
+2025-12-12,Y Citygate,Gas Daily,3.42,0.15,Y,USD/Dth
+2025-12-13,Y Citygate,Gas Daily,3.55,0.15,Y,USD/Dth
+2025-12-14,Y Citygate,Gas Daily,3.61,0.15,N,USD/Dth
+2025-12-15,Z Pool,Gas Daily,3.10,0.08,Y,USD/Dth
