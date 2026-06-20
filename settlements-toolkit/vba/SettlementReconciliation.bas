@@ -40,6 +40,19 @@ Private Const EXPECTED_UNIT As String = "Dth"   ' Principle 1: one unit, stated
 Private Const MATERIALITY_DTH As Double = 0      ' daily volume: any break shown
 Private Const KEY_SEP As String = "|"
 
+' ---- Per-source unit-of-record + sign convention (Principle 1 & 4) ----------
+' DECLARED_UNIT_* is used ONLY when a source has no per-row "units" column.
+' Leave blank to force a UNIT_UNKNOWN flag rather than assume a unit.
+' SIGN_* canonicalizes a feed whose stored values run opposite to "delivered
+' volume is positive" (e.g. an invoice that stores absolute magnitudes, or a
+' ledger that signs a sale negative). Set to -1 to flip a known-inverted feed.
+Private Const DECLARED_UNIT_BOOK As String = "Dth"
+Private Const DECLARED_UNIT_PIPE As String = "Dth"
+Private Const DECLARED_UNIT_CP   As String = "Dth"
+Private Const SIGN_BOOK As Double = 1#
+Private Const SIGN_PIPE As Double = 1#
+Private Const SIGN_CP   As Double = 1#
+
 ' ---- Sheet names ------------------------------------------------------------
 Private Const SH_BOOK As String = "book"
 Private Const SH_PIPE As String = "pipeline"
@@ -102,22 +115,33 @@ Private Sub WriteReconRow(ws As Worksheet, ByVal r As Long, ByVal key As String,
     Dim gasDay As String, contract As String, point As String
     gasDay = parts(0): contract = parts(1): point = parts(2)
 
-    ' --- Pull values; missing source -> flagged, never silently zeroed -------
+    ' --- Pull values: sign-canonicalized + converted to canonical Dth --------
+    ' (Principle 1) Each volume is normalized BEFORE differencing so a unit or
+    ' sign mismatch cannot masquerade as an economic break.
     Dim bookDel As Double, bookInv As Double
     Dim schedTimely As Double, schedFinal As Double, alloc As Double
     Dim recvFinal As Double, recvAlloc As Double, cpConf As Double
     Dim cutReason As String, allocMethod As String
+    Dim dq As String                              ' data-quality flag accumulator
 
-    bookDel = Num(book, key, "delivered_dth")
-    bookInv = Num(book, key, "invoiced_dth")
-    schedTimely = Num(pipe, key, "sched_timely_dth")
-    schedFinal = Num(pipe, key, "sched_final_dth")
-    alloc = Num(pipe, key, "allocated_dth")
-    recvFinal = Num(pipe, key, "receipt_sched_final_dth")
-    recvAlloc = Num(pipe, key, "receipt_allocated_dth")
-    cpConf = Num(cp, key, "confirmed_dth")
+    bookDel = CanonDth(book, key, "delivered_dth", DECLARED_UNIT_BOOK, SIGN_BOOK, dq, "book")
+    bookInv = CanonDth(book, key, "invoiced_dth", DECLARED_UNIT_BOOK, SIGN_BOOK, dq, "book.invoiced")
+    schedTimely = CanonDth(pipe, key, "sched_timely_dth", DECLARED_UNIT_PIPE, SIGN_PIPE, dq, "pipe")
+    schedFinal = CanonDth(pipe, key, "sched_final_dth", DECLARED_UNIT_PIPE, SIGN_PIPE, dq, "pipe")
+    alloc = CanonDth(pipe, key, "allocated_dth", DECLARED_UNIT_PIPE, SIGN_PIPE, dq, "pipe")
+    recvFinal = CanonDth(pipe, key, "receipt_sched_final_dth", DECLARED_UNIT_PIPE, SIGN_PIPE, dq, "pipe")
+    recvAlloc = CanonDth(pipe, key, "receipt_allocated_dth", DECLARED_UNIT_PIPE, SIGN_PIPE, dq, "pipe")
+    cpConf = CanonDth(cp, key, "confirmed_dth", DECLARED_UNIT_CP, SIGN_CP, dq, "cp")
     cutReason = Txt(pipe, key, "cut_reason")
     allocMethod = Txt(pipe, key, "alloc_method")
+
+    ' --- Artifact guards: rule out a unit or sign error before economics ------
+    ' Run on the CANONICALIZED book vs allocation (the values that feed the
+    ' break). A correctly labeled therms->Dth conversion that ties will NOT fire;
+    ' an unknown/mis-declared unit that leaves a ~10:1 gap WILL. Guards never
+    ' auto-correct -- they flag for the analyst to resolve first.
+    AppendFlag dq, DetectSignInversion(bookDel, alloc)
+    AppendFlag dq, DetectUnitMismatch(bookDel, alloc)
 
     ' --- Stage 4 logic: decompose the break (Principle 5: show the math) -----
     Dim cutDth As Double, allocVar As Double, totalBreak As Double
@@ -132,6 +156,14 @@ Private Sub WriteReconRow(ws As Worksheet, ByVal r As Long, ByVal key As String,
     Dim status As String, rootCause As String, confirmCheck As String
     ClassifyBreak totalBreak, cutDth, allocVar, cpVar, netImbalance, _
                   cutReason, status, rootCause, confirmCheck
+
+    ' A data-quality flag outranks an economic verdict: a "break" that is really
+    ' a unit/sign artifact must not be settled as economics (Principle 1).
+    If dq <> "" Then
+        status = "REVIEW DATA QUALITY"
+        confirmCheck = "Resolve unit/sign flag first; the volume break may be an artifact"
+    End If
+    If dq = "" Then dq = "clean (Dth, sign canonical)"
 
     Dim priceFinal As Boolean, allInPrice As Double, cashDelta As Double
     allInPrice = Num(idx, gasDay & KEY_SEP & point, "index_price") _
@@ -161,7 +193,38 @@ Private Sub WriteReconRow(ws As Worksheet, ByVal r As Long, ByVal key As String,
         .Cells(r, 18) = IIf(priceFinal, "Final", "PRELIMINARY")
         .Cells(r, 19) = cashDelta
         .Cells(r, 20) = IIf(allocMethod = "", "n/a", allocMethod)
+        .Cells(r, 21) = dq
     End With
+End Sub
+
+'==============================================================================
+' Sign-canonicalize + convert a volume to canonical Dth, accumulating any
+' data-quality flag. Unknown unit -> value passed through and source flagged.
+'==============================================================================
+Private Function CanonDth(data As Object, ByVal key As String, ByVal col As String, _
+                          ByVal declaredUnit As String, ByVal signConv As Double, _
+                          ByRef dq As String, ByVal srcTag As String) As Double
+    Dim raw As Double: raw = Num(data, key, col) * signConv
+    Dim effUnit As String
+    effUnit = ResolveUnit(Txt(data, key, "units"), declaredUnit)
+    If effUnit = "" Then
+        AppendFlag dq, "UNIT_UNKNOWN (" & srcTag & "." & col & "): no row unit and no declared unit"
+        CanonDth = raw
+        Exit Function
+    End If
+    Dim ok As Boolean
+    CanonDth = ToDth(raw, effUnit, ok)
+    If Not ok Then
+        AppendFlag dq, "UNIT_UNCONVERTIBLE (" & srcTag & ": '" & effUnit & _
+                       "' needs heat content / out of scope)"
+    End If
+End Function
+
+Private Sub AppendFlag(ByRef dq As String, ByVal flag As String)
+    If flag = "" Then Exit Sub
+    If InStr(1, dq, flag) > 0 Then Exit Sub        ' de-dupe repeated source flags
+    If dq <> "" Then dq = dq & "  ||  "
+    dq = dq & flag
 End Sub
 
 '==============================================================================
@@ -211,24 +274,22 @@ End Sub
 ' Most breaks are a unit or timing mismatch, not real economics (Principle 1).
 '==============================================================================
 Private Sub AnchorAndValidate(data As Object, ByVal sheetName As String)
+    ' Hard stop on the TIMING anchor (an unparseable gas day is unambiguous and
+    ' poisons the key). Units are handled downstream by CanonDth, which converts
+    ' what it can and FLAGS what it can't -- it never assumes Dth (Principle 4).
     Dim hasUnits As Boolean: hasUnits = data("__cols").Exists("units")
+    If Not hasUnits Then
+        Debug.Print "ANCHOR WARNING: sheet '" & sheetName & "' has no 'units' column; " & _
+            "rows will use the source's DECLARED_UNIT_* or be flagged UNIT_UNKNOWN."
+    End If
     Dim k As Variant
     For Each k In data.keys
         If Left(k, 2) <> "__" Then
-            ' gas_day must parse as a date (no calendar/gas-day confusion downstream)
             Dim gd As String: gd = Split(CStr(k), KEY_SEP)(0)
             If Not IsDate(gd) Then
                 Err.Raise vbObjectError + 1, , "Sheet '" & sheetName & _
                     "': gas_day '" & gd & "' is not a valid date. Anchor the gas-day " & _
                     "boundary (09:00-09:00 CT) before reconciling."
-            End If
-            If hasUnits Then
-                Dim u As String: u = Txt(data, CStr(k), "units")
-                If u <> "" And u <> EXPECTED_UNIT Then
-                    Err.Raise vbObjectError + 2, , "Sheet '" & sheetName & _
-                        "' row key '" & k & "': unit '" & u & "' <> expected '" & _
-                        EXPECTED_UNIT & "'. Convert volume->energy before reconciling."
-                End If
             End If
         End If
     Next k
@@ -356,7 +417,7 @@ Private Sub WriteHeader(ws As Worksheet)
               "Sched Final", "Allocated", "CP Confirmed", "Cut Dth", "Alloc Var", _
               "Total Break", "Net Imbalance", "Units", "Status", "Root Cause", _
               "Confirming Check", "All-in Price", "Price Status", "Cash Delta USD", _
-              "Alloc Method")
+              "Alloc Method", "Data Quality Flag")
     Dim j As Long
     For j = 0 To UBound(h)
         ws.Cells(1, j + 1) = h(j)
@@ -364,7 +425,7 @@ Private Sub WriteHeader(ws As Worksheet)
 End Sub
 
 Private Sub FormatOutput(ws As Worksheet, ByVal lastRow As Long)
-    With ws.Range(ws.Cells(1, 1), ws.Cells(1, 20))
+    With ws.Range(ws.Cells(1, 1), ws.Cells(1, 21))
         .Font.Bold = True
         .Interior.Color = RGB(31, 78, 121)
         .Font.Color = RGB(255, 255, 255)
@@ -378,8 +439,11 @@ Private Sub FormatOutput(ws As Worksheet, ByVal lastRow As Long)
     Dim i As Long
     For i = 2 To lastRow
         Dim c As Long
-        If InStr(1, ws.Cells(i, 14).Value, "BREAK") > 0 Then
-            For c = 1 To 20: ws.Cells(i, c).Interior.Color = RGB(252, 228, 214): Next c
+        If InStr(1, ws.Cells(i, 14).Value, "REVIEW DATA QUALITY") > 0 Then
+            ' amber: a unit/sign artifact outranks the economic verdict
+            For c = 1 To 21: ws.Cells(i, c).Interior.Color = RGB(255, 235, 156): Next c
+        ElseIf InStr(1, ws.Cells(i, 14).Value, "BREAK") > 0 Then
+            For c = 1 To 21: ws.Cells(i, c).Interior.Color = RGB(252, 228, 214): Next c
         ElseIf ws.Cells(i, 14).Value = "TIE" Then
             ws.Cells(i, 14).Interior.Color = RGB(226, 239, 218)
         End If

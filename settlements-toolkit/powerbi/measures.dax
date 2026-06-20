@@ -39,12 +39,42 @@ RETURN p + b
 
 Cash Delta USD = [Total Break Dth] * [All-in Price]
 
+// ---- Pre-economics guards: unit / sign artifacts (Principle 1) --------------
+// NOTE: normalize units in Power Query FIRST. Apply each source's declared
+// unit-of-record and convert to Dth (1 Dth = 1 MMBtu = 10 therms); a feed with
+// no unit column and no declared unit must surface as a blank/UNIT_UNKNOWN tag,
+// never silently assumed Dth. This measure is the second line of defense: it
+// fingerprints an order-of-magnitude unit gap or an inverted sign that survived
+// load, so a phantom break is never settled as economics.
+Unit Sign Flag =
+VAR a = [Book Delivered Dth]
+VAR b = [Allocated Dth]
+VAR ratio = DIVIDE ( ABS ( a ), ABS ( b ) )
+RETURN
+SWITCH (
+    TRUE (),
+    a = 0 || b = 0, "",
+    ( a > 0 ) <> ( b > 0 ) && ABS ( ABS ( a ) - ABS ( b ) ) <= 0.01 * ABS ( b ),
+        "SIGN INVERSION (equal magnitude, opposite sign) - canonicalize, do not Abs() away",
+    ( a > 0 ) <> ( b > 0 ), "SIGN DISAGREEMENT (real directional break)",
+    ABS ( ratio - 10 ) <= 0.1,      "UNIT MISMATCH ~10:1 (therms reported as Dth?)",
+    ABS ( ratio - 0.1 ) <= 0.001,   "UNIT MISMATCH ~1:10 (Dth reported as therms?)",
+    ABS ( ratio - 1000 ) <= 10,     "UNIT MISMATCH ~1000:1 (MMBtu vs Btu?)",
+    ABS ( ratio - 0.001 ) <= 0.00001, "UNIT MISMATCH ~1:1000 (Btu vs MMBtu?)",
+    ""
+)
+
 // ---- Status + classification (Principle 6: ranked cause) --------------------
+// A data-quality flag outranks the economic verdict.
 Break Status =
 IF (
-    ABS ( [Total Break Dth] ) <= 0 && ABS ( [CP Var Dth] ) <= 0,
-    "TIE",
-    "BREAK"
+    [Unit Sign Flag] <> "",
+    "REVIEW DATA QUALITY",
+    IF (
+        ABS ( [Total Break Dth] ) <= 0 && ABS ( [CP Var Dth] ) <= 0,
+        "TIE",
+        "BREAK"
+    )
 )
 
 Break Count = SUMX (
