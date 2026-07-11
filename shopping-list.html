@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trader Joe's Shopping List</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    :root {
+        --tj-red: #c8102e;
+        --tj-red-dark: #a30d25;
+        --ink: #2c3e50;
+        --muted: #8a95a1;
+        --line: #eceff3;
+        --bg: #f5f6f8;
+        --card: #ffffff;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.5;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        padding: 24px 16px 64px;
+    }
+
+    .app {
+        width: 100%;
+        max-width: 480px;
+    }
+
+    /* Header */
+    .app-header {
+        background: var(--tj-red);
+        color: #fff;
+        border-radius: 16px 16px 0 0;
+        padding: 22px 22px 20px;
+        text-align: center;
+    }
+
+    .app-header .cart { font-size: 26px; line-height: 1; }
+    .app-header h1 {
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        margin-top: 6px;
+    }
+    .app-header .count {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    /* Add row */
+    .add-row {
+        display: flex;
+        gap: 8px;
+        background: var(--card);
+        padding: 14px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .add-row input {
+        flex: 1;
+        border: 1px solid #dfe4ea;
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 15px;
+        color: var(--ink);
+        outline: none;
+        transition: border-color 0.15s;
+    }
+    .add-row input:focus { border-color: var(--tj-red); }
+
+    .add-row button {
+        border: none;
+        background: var(--tj-red);
+        color: #fff;
+        font-size: 22px;
+        font-weight: 600;
+        width: 48px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+    .add-row button:active { background: var(--tj-red-dark); }
+
+    /* List */
+    ul { list-style: none; background: var(--card); }
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        animation: pop 0.18s ease;
+    }
+    @keyframes pop { from { opacity: 0; transform: translateY(-4px);} to {opacity:1; transform:none;} }
+
+    .check {
+        flex: none;
+        width: 24px;
+        height: 24px;
+        border: 2px solid #cdd4dc;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+    }
+    .check svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 3; fill: none; opacity: 0; transition: opacity 0.15s; }
+
+    li.done .check { background: var(--tj-red); border-color: var(--tj-red); }
+    li.done .check svg { opacity: 1; }
+
+    .label {
+        flex: 1;
+        font-size: 15px;
+        cursor: pointer;
+        transition: color 0.15s;
+        word-break: break-word;
+    }
+    li.done .label { color: var(--muted); text-decoration: line-through; }
+
+    .del {
+        flex: none;
+        background: none;
+        border: none;
+        color: #c2cad3;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px 6px;
+        line-height: 1;
+        transition: color 0.15s;
+    }
+    .del:hover { color: var(--tj-red); }
+
+    .empty {
+        text-align: center;
+        color: var(--muted);
+        font-size: 14px;
+        padding: 40px 20px;
+        background: var(--card);
+    }
+
+    /* Footer */
+    .app-footer {
+        background: var(--card);
+        border-radius: 0 0 16px 16px;
+        padding: 14px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 6px 24px rgba(0,0,0,0.06);
+    }
+
+    .app-footer .remaining { font-size: 13px; color: var(--muted); }
+    .app-footer .actions { display: flex; gap: 8px; }
+
+    .app-footer button {
+        border: 1px solid #dfe4ea;
+        background: #fff;
+        color: var(--ink);
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .app-footer button:hover { border-color: var(--tj-red); color: var(--tj-red); }
+
+    .credit {
+        text-align: center;
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 16px;
+    }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="app-header">
+        <div class="cart">🛒</div>
+        <h1>Trader Joe's Shopping List</h1>
+        <div class="count" id="count">0 items</div>
+    </div>
+
+    <div class="add-row">
+        <input id="newItem" type="text" placeholder="Add an item…" autocomplete="off">
+        <button id="addBtn" aria-label="Add item">+</button>
+    </div>
+
+    <ul id="list"></ul>
+
+    <div class="app-footer">
+        <span class="remaining" id="remaining">0 left</span>
+        <div class="actions">
+            <button id="clearChecked">Clear checked</button>
+            <button id="clearAll">Clear all</button>
+        </div>
+    </div>
+
+    <p class="credit">Saved automatically on this device</p>
+</div>
+
+<script>
+    const STORAGE_KEY = 'tj-shopping-list';
+    const DEFAULT_ITEMS = [
+        'Mini mozzarella balls',
+        'Mini tomatoes',
+        'Bow tie pasta',
+        'Cantaloupe',
+        'Tortilla chips',
+        'Seltzer cans',
+        'Barbara'
+    ];
+
+    const listEl = document.getElementById('list');
+    const countEl = document.getElementById('count');
+    const remainingEl = document.getElementById('remaining');
+    const input = document.getElementById('newItem');
+
+    let items = load();
+
+    function load() {
+        try {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) return JSON.parse(saved);
+        } catch (e) {}
+        return DEFAULT_ITEMS.map(t => ({ id: uid(), text: t, done: false }));
+    }
+
+    function save() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); } catch (e) {}
+    }
+
+    function uid() {
+        return 'i' + Math.floor(performance.now() * 1000) + '_' + (items ? items.length : 0);
+    }
+
+    function render() {
+        listEl.innerHTML = '';
+        if (items.length === 0) {
+            const p = document.createElement('div');
+            p.className = 'empty';
+            p.textContent = 'Your list is empty. Add something above.';
+            listEl.appendChild(p);
+        } else {
+            items.forEach(item => listEl.appendChild(row(item)));
+        }
+        const done = items.filter(i => i.done).length;
+        countEl.textContent = items.length + (items.length === 1 ? ' item' : ' items');
+        const left = items.length - done;
+        remainingEl.textContent = left + ' left';
+        save();
+    }
+
+    function row(item) {
+        const li = document.createElement('li');
+        if (item.done) li.className = 'done';
+
+        const check = document.createElement('div');
+        check.className = 'check';
+        check.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6"/></svg>';
+        check.addEventListener('click', () => toggle(item.id));
+
+        const label = document.createElement('span');
+        label.className = 'label';
+        label.textContent = item.text;
+        label.addEventListener('click', () => toggle(item.id));
+
+        const del = document.createElement('button');
+        del.className = 'del';
+        del.innerHTML = '&times;';
+        del.setAttribute('aria-label', 'Remove ' + item.text);
+        del.addEventListener('click', () => remove(item.id));
+
+        li.append(check, label, del);
+        return li;
+    }
+
+    function add(text) {
+        text = text.trim();
+        if (!text) return;
+        items.push({ id: uid(), text: text, done: false });
+        render();
+    }
+
+    function toggle(id) {
+        const it = items.find(i => i.id === id);
+        if (it) it.done = !it.done;
+        render();
+    }
+
+    function remove(id) {
+        items = items.filter(i => i.id !== id);
+        render();
+    }
+
+    document.getElementById('addBtn').addEventListener('click', () => {
+        add(input.value);
+        input.value = '';
+        input.focus();
+    });
+
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            add(input.value);
+            input.value = '';
+        }
+    });
+
+    document.getElementById('clearChecked').addEventListener('click', () => {
+        items = items.filter(i => !i.done);
+        render();
+    });
+
+    document.getElementById('clearAll').addEventListener('click', () => {
+        if (confirm('Clear the entire list?')) {
+            items = [];
+            render();
+        }
+    });
+
+    render();
+</script>
+</body>
+</html>
